@@ -1,6 +1,10 @@
 # NQueens
 
-**TODO: Add description**
+A solution to the N-Queens problem in Elixir. Solved with property-based testing using StreamData and  ExUnitProperties.
+
+### The NQueens Problem
+
+How can I place N queens on an NxN chessboard such that all the queens are safe and none of them can attack one another.
 
 ## Installation
 

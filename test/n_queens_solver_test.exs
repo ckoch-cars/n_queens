@@ -1,7 +1,6 @@
 defmodule NQueensSolverTest do
   use ExUnit.Case
   use ExUnitProperties
-  # doctest NQueens
 
   test "n = 1" do
     assert NQueensSolver.solve(1) == [{0,0}]
@@ -18,53 +17,17 @@ defmodule NQueensSolverTest do
     assert NQueensSolver.visualize(3) == []
   end
 
-  # test "n = 4" do
-  #   solutions = NQueensSolver.solve(4)
-  #   assert Enum.count(solutions) == 2
-  #   assert solutions |> Enum.at(0) == [{1, 0}, {3, 1}, {0, 2}, {2, 3}]
-  #   assert solutions |> Enum.at(-1) == [{2, 0}, {0, 1}, {3, 2}, {1, 3}]
-  # end
+  test "n = 4" do
+    solution = NQueensSolver.solve(4)
+    assert solution == [{1, 0}, {3, 1}, {0, 2}, {2, 3}] || solution == [{2, 0}, {0, 1}, {3, 2}, {1, 3}]
+  end
 
-  # test "visualize/2 n = 4" do
-  #   NQueensSolver.solve(4)
-  #   |> NQueensSolver.visualize(4)
-  #   |> IO.inspect
-  #   # assert solutions |> Enum.at(0) |> NQueensSolver.visualize(4) == [["", "Q", "", ""], ["", "", "", "Q"], ["Q", "", "", ""], ["", "", "Q", ""]]
-  #   # assert solutions |> Enum.at(-1) |> NQueensSolver.visualize(4) == [["", "", "Q", ""], ["Q", "", "", ""], ["", "", "", "Q"], ["", "Q", "", ""]]
-  # end
-
-  # test "visualize/2 n = 5" do
-  #   solutions = NQueensSolver.solve(5)
-  #   assert solutions |> Enum.at(0)
-  #   |> NQueensSolver.visualize(5) == [["Q", "", "", "", ""], ["", "", "Q", "", ""], ["", "", "", "", "Q"], ["", "Q", "", "", ""], ["", "", "", "Q", ""]]
-  #   assert solutions |> Enum.at(-1)
-  #   |> NQueensSolver.visualize(5) == [["", "", "", "", "Q"], ["", "", "Q", "", ""], ["Q", "", "", "", ""], ["", "", "", "Q", ""], ["", "Q", "", "", ""]]
-  # end
-
-  # test "n = 5" do
-  #   solutions = NQueensSolver.solve(5)
-  #   assert Enum.count(solutions) == 10
-  #   assert solutions |> Enum.at(0) == [{0, 0}, {2, 1}, {4, 2}, {1, 3}, {3, 4}]
-  #   assert solutions |> Enum.at(1) == [{0, 0}, {3, 1}, {1, 2}, {4, 3}, {2, 4}]
-  #   assert solutions |> Enum.at(-1) == [{4, 0}, {2, 1}, {0, 2}, {3, 3}, {1, 4}]
-  # end
-
-  # test "visualize/2 n = 6" do
-  #   n = 6
-  #   assert NQueensSolver.solve(n) |> Enum.at(0)
-  #   |> NQueensSolver.visualize(n) == [["", "Q", "", "", "", ""], ["", "", "", "Q", "", ""], ["", "", "", "", "", "Q"], ["Q", "", "", "", "", ""], ["", "", "Q", "", "", ""], ["", "", "", "", "Q", ""]]
-  #   assert NQueensSolver.solve(n) |> Enum.at(1)
-  #   |> NQueensSolver.visualize(n) == [["", "", "Q", "", "", ""], ["", "", "", "", "", "Q"], ["", "Q", "", "", "", ""], ["", "", "", "", "Q", ""], ["Q", "", "", "", "", ""], ["", "", "", "Q", "", ""]]
-  # end
-
-  # test "n = 6" do
-  #   solutions = NQueensSolver.solve(6)
-  #   assert Enum.count(solutions) == 4
-  #   assert solutions |> Enum.at(0) == [{1, 0}, {3, 1}, {5, 2}, {0, 3}, {2, 4}, {4, 5}]
-  #   assert solutions |> Enum.at(1) == [{2, 0}, {5, 1}, {1, 2}, {4, 3}, {0, 4}, {3, 5}]
-  #   assert solutions |> Enum.at(2) == [{3, 0}, {0, 1}, {4, 2}, {1, 3}, {5, 4}, {2, 5}]
-  #   assert solutions |> Enum.at(3) == [{4, 0}, {2, 1}, {0, 2}, {5, 3}, {3, 4}, {1, 5}]
-  # end
+  test "visualize/2 n = 4" do
+    board = NQueensSolver.solve(4)
+    |> NQueensSolver.visualize(4)
+    |> IO.inspect(label: "Board size 4")
+    assert board == [["", "Q", "", ""], ["", "", "", "Q"], ["Q", "", "", ""], ["", "", "Q", ""]] || [["", "", "Q", ""], ["Q", "", "", ""], ["", "", "", "Q"], ["", "Q", "", ""]]
+  end
 
   describe "visualize/1 properties" do
     property "solution length == n, and each el length == n" do
@@ -116,14 +79,12 @@ defmodule NQueensSolverTest do
   end
 
   describe "solve/1 validate diagonal property" do
-    # @tag timeout: 300_000
     property "each diagonal contains zero or one 'Q'" do
       check all int <- integer(4..10) do
-        # IO.inspect("N: #{int}")
         solution = NQueensSolver.solve(int)
+        |> NQueensSolver.visualize(int)
+        |> IO.inspect(label: "Visualized N Queens Solutions for board of size: #{int}")
         |> MapSet.new()
-        # IO.inspect("Solutions size: #{MapSet.size(solution)}")
-
         diagonal_coords = diagonals(int)
         Enum.each(diagonal_coords, fn(diag) ->
           dms = MapSet.new(diag)
@@ -136,178 +97,21 @@ defmodule NQueensSolverTest do
   end
 
   describe "solve/1 larger values of N" do
-    test "N=4" do
-      int = 4
-      IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      IO.inspect("Solutions size: #{MapSet.size(solution)}")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    test "N=6" do
-      int = 6
-      IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      IO.inspect("Solutions size: #{MapSet.size(solution)}")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    test "N=7" do
-      int = 7
-      IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      IO.inspect("Solutions size: #{MapSet.size(solution)}")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    test "N=8" do
-      int = 8
-      # IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      |> IO.inspect(label: "size 8")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    test "N=9" do
-      int = 9
-      IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      IO.inspect("Solutions size: #{MapSet.size(solution)}")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    @tag timeout: 120_000
-    test "N=10" do
-      int = 10
-      IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      IO.inspect("Solutions size: #{MapSet.size(solution)}")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
     @tag timeout: 300_000
-    test "N=11" do
-      int = 11
-      IO.inspect("N: #{int}")
-      solution = NQueensSolver.solve(int)
-      |> MapSet.new()
-      IO.inspect("Solutions size: #{MapSet.size(solution)}")
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    @tag timeout: 300_000
-    test "N=12" do
-      int = 12
-      solution = NQueensSolver.solve(int)
-      |> NQueensSolver.visualize(int)
-      |> IO.inspect(label: "Visualized N Queens Solutions for board of size: #{int}")
-      |> MapSet.new()
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    # @tag :skip
-    @tag timeout: 300_000
-    test "N=13" do
-      int = 13
-      solution = NQueensSolver.solve(int)
-      |> NQueensSolver.visualize(int)
-      |> IO.inspect
-      |> MapSet.new()
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    # @tag :skip
-    @tag timeout: 300_000
-    test "N=14" do
-      int = 14
-      solution = NQueensSolver.solve(int)
-      |> NQueensSolver.visualize(int)
-      |> IO.inspect(label: "Visualized N Queens Solutions for board of size: #{int}")
-      |> MapSet.new()
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
-    end
-
-    @tag :skip
-    @tag timeout: 300_000
-    test "N=15" do
-      int = 15
-      solution = NQueensSolver.solve(int)
-      |> NQueensSolver.visualize(int)
-      |> IO.inspect(label: "Visualized N Queens Solutions for board of size: #{int}")
-      |> MapSet.new()
-      diagonal_coords = diagonals(int)
-      Enum.each(diagonal_coords, fn(diag) ->
-        dms = MapSet.new(diag)
-        intersection_size = MapSet.intersection(dms, solution)
-        |> MapSet.size()
-        assert intersection_size <= 1
-      end)
+    property "each diagonal contains zero or one 'Q'" do
+      check all int <- integer(11..15), max_runs: 10 do
+        solution = NQueensSolver.solve(int)
+        |> NQueensSolver.visualize(int)
+        |> IO.inspect(label: "Visualized N Queens Solutions for board of size: #{int}")
+        |> MapSet.new()
+        diagonal_coords = diagonals(int)
+        Enum.each(diagonal_coords, fn(diag) ->
+          dms = MapSet.new(diag)
+          intersection_size = MapSet.intersection(dms, solution)
+          |> MapSet.size()
+          assert intersection_size <= 1
+        end)
+      end
     end
   end
 
@@ -331,7 +135,7 @@ defmodule NQueensSolverTest do
     assert diagonals(4) == all_diagonals
   end
 
-  # given square matrix of size n
+  # given square 2D matrix of size NxN, output all the diagonal paths in the matrix.
   # output == [[{1,1},..{n,n}],[{2,1}..{n,n-1}]..[{n,n}]]
   def diagonals(n) do
     Enum.flat_map(0..n-1, fn(i) ->
